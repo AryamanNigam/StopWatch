@@ -34,11 +34,14 @@ void handle_input(WINDOW* win, char **choices, int n_choices, int *highlight, in
                     *start = 0;
                     *stop = 1;
                 }
-            } else if (*highlight == 1) {
+            } 
+			else if (*highlight == 1) {
                 *reset = 1;
-            } else if (*highlight == 2) {
+            } 
+			else if (*highlight == 2) {
                 *lap = 1;
-            } else if (*highlight == 3) {
+            } 
+			else if (*highlight == 3) {
                 *quit = 1;
             }
             break;
@@ -49,7 +52,8 @@ void handle_input(WINDOW* win, char **choices, int n_choices, int *highlight, in
 
 void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int *stop, int *reset, int *lap) { //Function that operates Stopwatch
     static int elapsed = 0;
-	static int lap_no = 1;
+    static int lap_no = 1;
+
     if (*start == 1) {
         Sleep(100); 
         elapsed += 100;
@@ -58,9 +62,9 @@ void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int 
             elapsed = 0;
             if (*sec == 60) {
                 (*min)++;
-                *sec = 0;
+                *sec = 0;	
             }
-            update(win, *min, *sec);
+            update(win, *min, *sec); 
         }
     }
 
@@ -72,12 +76,17 @@ void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int 
     if (*reset == 1) {
         *min = 0;
         *sec = 0;
-        werase(win);
-        box(win, 0, 0);
+
+        mvwprintw(win, 12, 22, "00:00");
         wrefresh(win);
-        update(win, *min, *sec);
+
+        werase(lapwin);
+        box(lapwin, 0, 0);
+        mvwprintw(lapwin, 1, 5, "Laps");
+        wrefresh(lapwin);
+        
         *reset = 0;
-		lap_no = 1;
+        lap_no = 1;
     }
 
     if (*lap == 1) {
@@ -87,6 +96,7 @@ void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int 
         *lap = 0;
     }
 }
+
 
 int main() {
     int height = 25;
@@ -113,6 +123,7 @@ int main() {
     box(win, 0, 0);
     wrefresh(win);
 	mvwprintw(win, 1, 20, "Stopwatch");
+	mvwprintw(win, 12, 22, "00:00");
 	wrefresh(win);
 
     WINDOW* lapwin = newwin(height, 15, startx, 101); //Creates window that holds lap times
