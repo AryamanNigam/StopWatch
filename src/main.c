@@ -1,4 +1,4 @@
-#include <ncurses/ncurses.h>
+#include <ncurses/ncurses.h> //If this doesn't work, then try changing to #include <ncurses.h>
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
