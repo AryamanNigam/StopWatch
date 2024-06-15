@@ -9,4 +9,4 @@ gcc ./src/main.c -o StopWatch.exe
 ``` 
 
 ## Demo
-![Demo](".\assets\Demo.gif")
+![Demo]("./assets/Demo.gif")
