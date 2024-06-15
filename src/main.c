@@ -2,92 +2,173 @@
 #include <windows.h> // for Sleep function
 #include <ncurses/ncurses.h>
 
-int stopwatch(WINDOW* game, int* min, int* sec) {
+#include <ncurses/ncurses.h>
+#include <string.h>
+#include <stdio.h>
+#include <windows.h>
+
+int stopwatch(WINDOW* win, int* min, int* sec, int start, int stop, int reset, int lap, int quit) {
     while (1) {
-        box(game, 0, 0); // Redraw the box around the window
-        mvwprintw(game, 1, 1, "%02d:%02d", *min, *sec);
-        wrefresh(game);
-        Sleep(1000); // Sleep for 1000 milliseconds (1 second)
+        mvwprintw(win, 12, 25, "%02d:%02d", *min, *sec);
+        if(start==1){
+			wrefresh(win);
+			Sleep(1000);
 
-        (*sec)++;
-        if (*sec == 60) {
-            (*min)++;
-            *sec = 0;
-        }
+			(*sec)++;
+			if (*sec == 60) {
+				(*min)++;
+				*sec = 0;
+			}
 
-        if (*min == 5) {
-            break;
-        }
-
-        // Check for user input to quit or pause
-        int ch = getch();
-        if (ch == 'q') { // Press 'q' to quit
-            return 0; // Return 0 to indicate quitting
-        }
-        if (ch == 'p') { // Press 'p' to pause
-            while (1) {
-                int x = getch();
-                if (x == 'p') { // Press 'p' again to resume
-                    break;
-                }
-                if (x == 'q') { // Press 'q' to quit
-                    return 0; // Return 0 to indicate quitting
-                }
-                if (x == 'r') {
-					*min = 0;
-					*sec = 0;
-					werase(game); // Clear window content
-					box(game, 0, 0); // Redraw the box around the window
-					wrefresh(game);
-					break; // Restart stopwatch
-	            }
-                Sleep(100); // Sleep for a short period to reduce CPU usage
-            }
-        }
-    }
-    return 1; // Return 1 to indicate continuation
+			if (stop==1) {
+				while (1) {
+					if (start == 1) {
+						break;
+					}
+					if (quit==1) {
+						return 0;
+					}
+					if (reset==1) {
+						*min = 0;
+						*sec = 0;
+						werase(win);
+						box(win, 0, 0);
+						wrefresh(win);
+						break;
+					}
+				}
+			}
+			
+			if(lap==1){
+				int y=0;
+				WINDOW* lapwin=newwin(25, 10, 5, 101);
+				mvwprintw(lapwin, y+1, 102, "%02d:%02d", *min, *sec);
+				y++;
+			}
+		}
+	}
+    return 1;
 }
 
-int main() {
-    int min = 0;
-    int sec = 0;
-    initscr(); // Initialize ncurses
-    noecho(); // Don't echo keys to screen
-    curs_set(0); // Hide cursor
-    nodelay(stdscr, TRUE); // Set getch to non-blocking
 
-    WINDOW* game = newwin(10, 30, 1, 1); // Create a new window
-    box(game, 0, 0); // Draw a box around the window
-    wrefresh(game);
+
+int main() {
+    int height = 25; // Adjusted height to fit choices comfortably
+    int width = 50;
+	int min = 0;
+	int sec = 0;
+	int start = 0;
+	int stop = 0;
+	int reset = 0;
+	int lap = 0;
+	int quit = 0;
+	
+    initscr();
+    noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+	curs_set(0);
+	
+    WINDOW* win = newwin(height, width, 5, 50);
+    refresh();
+    box(win, 0, 0);
+    wrefresh(win);
+
+    keypad(win, TRUE);
+    wrefresh(win);
+
+    char *choices[] = {"Start", "Reset", "Lap", "Quit"};
+    int n_choices = sizeof(choices) / sizeof(char *);
+    int choice;
+    int highlight = 0;
 
     while (1) {
-        int result = stopwatch(game, &min, &sec);
-        if (result == 0) {
-            break; // Quit if stopwatch returns 0
-        }
-
-        while (1) {
-            int c = getch();
-            if (c == 'r') {
-                min = 0;
-                sec = 0;
-                werase(game); // Clear window content
-                box(game, 0, 0); // Redraw the box around the window
-                wrefresh(game);
-                break; // Restart stopwatch
+        for (int i = 0; i < n_choices; i++) {
+            if (i == highlight) {
+                wattron(win, A_REVERSE);
             }
-            if (c == 'q') {
-                result = 0; // Set result to 0 to indicate quitting
+            mvwprintw(win, 20, 7+i*10, "%s", choices[i]);
+            wattroff(win, A_REVERSE);
+        }
+        wrefresh(win);
+        
+        choice = wgetch(win);
+        switch (choice) {
+            case KEY_LEFT:
+                highlight--;
+                if (highlight == -1) {
+                    highlight = n_choices - 1;
+                }
                 break;
-            }
+            case KEY_RIGHT:
+                highlight++;
+                if (highlight == n_choices) {
+                    highlight = 0;
+                }
+                break;
+            default:
+                break;
         }
+        if (choice == 10) { // Enter key
+            if(highlight==0){
+				if(strcmp(choices[0],"Start")==0){
+					choices[0]="Stop";
+					start=1;
+					stop=0;
+				}
+				else if(strcmp(choices[0],"Stop")==0){
+					choices[0]="Start";
+					start=0;
+					stop=1;
+				}
+				reset=0;
+				quit=0;
+			}
+			else if(highlight==1){
+				start=0;
+				stop=0;
+				reset=1;
+				quit=0;
+			}
+			else if(highlight==2){
+				start=0;
+				stop=0;
+				reset=0;
+				lap++;
+				quit=0;
+			}
+			else if(highlight==3){
+				start=0;
+				stop=0;
+				reset=0;
+				quit=1;
+			}
+			
+			int result=stopwatch(win, &min, &sec, start, stop, reset, lap, quit);
+			while (1) {
+				if (reset == 1) {
+					min = 0;
+					sec = 0;
+					werase(win);
+					box(win, 0, 0);
+					wrefresh(win);
+					break;
+				}
+				if (quit == 1) {
+					result = 0;
+					break;
+				}
+			}
 
-        if (result == 0) {
-            break; // Quit if result is 0
+			if (result == 0) {
+				break;
+			}
         }
     }
+	
+	
 
-    delwin(game); // Delete the window
-    endwin(); // Properly end the ncurses session
+    delwin(win);
+    endwin();
     return 0;
 }
