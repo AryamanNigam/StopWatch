@@ -171,4 +171,4 @@ int main() {
     delwin(win);
     endwin();
     return 0;
-}
+}	
