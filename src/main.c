@@ -1,14 +1,14 @@
-#include <ncurses/ncurses.h> //If this doesn't work, then try changing to #include <ncurses.h>
+#include <ncurses/ncurses.h> //if this doesn't work, then try changing to #include <ncurses.h>
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
 
-void update(WINDOW* win, int min, int sec) { //Function to update the time shown
+void update(WINDOW* win, int min, int sec) { 
     mvwprintw(win, 12, 22, "%02d:%02d", min, sec);
     wrefresh(win);
 }
 
-void handle_input(WINDOW* win, char **choices, int n_choices, int *highlight, int *start, int *stop, int *reset, int *lap, int *quit) { //Function to handle input
+void handle_input(WINDOW* win, char **choices, int n_choices, int *highlight, int *start, int *stop, int *reset, int *lap, int *quit) { 
     int choice = wgetch(win);
     switch (choice) {
         case KEY_LEFT:
@@ -50,7 +50,7 @@ void handle_input(WINDOW* win, char **choices, int n_choices, int *highlight, in
     }
 }
 
-void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int *stop, int *reset, int *lap) { //Function that operates Stopwatch
+void stopwatch(WINDOW* win, WINDOW* lapwin, int* min, int* sec, int *start, int *stop, int *reset, int *lap) { 
     static int elapsed = 0;
     static int lap_no = 1;
 
@@ -118,7 +118,7 @@ int main() {
     keypad(stdscr, TRUE);  
     curs_set(0);
 
-    WINDOW* win = newwin(height, width, startx, starty); //Creates window that holds stopwatch and menu
+    WINDOW* win = newwin(height, width, startx, starty); 
     refresh();
     box(win, 0, 0);
     wrefresh(win);
@@ -126,7 +126,7 @@ int main() {
 	mvwprintw(win, 12, 22, "00:00");
 	wrefresh(win);
 
-    WINDOW* lapwin = newwin(height, 15, startx, 101); //Creates window that holds lap times
+    WINDOW* lapwin = newwin(height, 15, startx, 101); 
     box(lapwin, 0, 0);
     mvwprintw(lapwin, 1, 5, "Laps");
 	wrefresh(lapwin);
@@ -140,7 +140,7 @@ int main() {
     int n_choices = sizeof(choices) / sizeof(char *);
     int highlight = 0;
 
-    while (1) {										//Game loop
+    while (1) {										
         for (int i = 0; i < n_choices; i++) {
             if (i == highlight) {
                 wattron(win, A_REVERSE);
